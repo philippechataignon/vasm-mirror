@@ -151,7 +151,7 @@ static void align(FILE *f, section *sec, atom *a)
     }
   }
 
-  while (len--) {
+  while (--len) {
     buffer_data(f, 0);
   }
 }
