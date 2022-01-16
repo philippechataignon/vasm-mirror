@@ -74,11 +74,12 @@ static void write_data_record(FILE *f)
   /* pre-flight checks */
   if (buffer_i == 0)
     return;
-  if (ihex_fmt == I8HEX && addr > UINT16_MAX)
+  /* 0x10000 can be touch when code ends in 0xFFFF) */
+  if (ihex_fmt == I8HEX && addr > 0x10000)
     output_error(11, addr);
   if (ihex_fmt == I16HEX && addr > MEBIBYTE)
     output_error(11, addr);
-  
+
   start = addr - buffer_i;
   ext = start >> 16;
   start &= 0xFFFF;
@@ -167,7 +168,7 @@ static void write_output(FILE *f, section *sec, symbol *sym)
   for (; sym; sym = sym->next)
     if (sym->type == IMPORT)
       output_error(6, sym->name); /* undefined symbol (sym->name) */
-  
+
   /* fail on overlapping sections
      adapted from output_bin.c */
   for (s = sec; s != NULL; s = s->next) {
@@ -201,7 +202,7 @@ static void write_output(FILE *f, section *sec, symbol *sym)
     /* flush buffer before moving on to next section */
     write_data_record(f);
   }
-  
+
   write_eof_record(f);
   myfree(buffer);
 }
@@ -243,7 +244,7 @@ int init_output_ihex(char **cp, void (**wo)(FILE *, section *, symbol *), int (*
     output_error(1, cpuname); /* output module doesn't support (cpuname) */
     return 0;
   }
-  
+
   *cp = copyright;
   *wo = write_output;
   *oa = parse_args;
